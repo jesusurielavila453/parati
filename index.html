@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para ti ❤️</title>
+<style>
+*{margin:0; padding:0; box-sizing:border-box; overflow:hidden;}
+#container{width:100vw; height:100vh; background: radial-gradient(circle at center, #001122 0%, #000000 100%); position:fixed; top:0; left:0;}
+canvas{position:fixed; top:0; left:0; z-index:1;}
+#modalCarta{ display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; }
+#modalCarta.show{display:flex;}
+#cardContainer{ width:92vw; max-width:500px; height:78vh; background:#fff; border-radius:15px; overflow:hidden; display:flex; flex-direction:column; }
+#cardFrame{width:100%; height:100%; border:none; flex:1;}
+#botones{display:flex; gap:10px; padding:12px; background:#111; justify-content:center;}
+.btn{padding:10px 20px; font-weight:bold; color:#fff; border:none; border-radius:20px;}
+#cerrarModal{background:#444;}
+#abrirLink{background:linear-gradient(135deg, #ff2e6d, #ff0080);}
+#playBtn{ position:fixed; bottom:25px; right:25px; z-index:200; padding:12px 22px; border:2px solid #00eaff; border-radius:30px; background: linear-gradient(135deg, #00eaff, #008cff); color:white; font-weight:bold; }
+#texto{position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:10; color:rgba(0,234,255,0.8); font-size:13px; letter-spacing:2px; pointer-events:none;}
+</style>
+</head>
+<body>
+
+<div id="container"></div>
+<div id="texto">TOCA LA GALAXIA ✨</div>
+
+<div id="modalCarta">
+  <div id="cardContainer">
+    <iframe id="cardFrame" src=""></iframe>
+    <div id="botones">
+      <button id="cerrarModal" class="btn">Cerrar</button>
+      <button id="abrirLink" class="btn">❤️ Abrir en grande</button>
+    </div>
+  </div>
+</div>
+
+<button id="playBtn">🎵 SONAR</button>
+
+<audio id="miAudio" loop crossorigin="anonymous" preload="auto">
+  <source src="https://cdnb.worlddancesport.org/musicsamples/f2b66e0d-3dec-4a7e-a265-a898007d63f1.mp3" type="audio/mpeg">
+</audio>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.162.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const container = document.getElementById('container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+camera.position.z = 5;
+
+const starsGeo = new THREE.BufferGeometry();
+const starsCount = 10000;
+const starsPos = [];
+for(let i=0;i<starsCount*3;i++) starsPos.push((Math.random()-0.5)*50);
+starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsPos, 3));
+scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0x88ccff, size: 0.05 })));
+
+const flowerGeo = new THREE.BufferGeometry();
+const flowerCount = 2500;
+const flowerPos = []; const flowerColors = [];
+for(let i=0;i<flowerCount;i++){
+  const t = Math.random()*Math.PI*2;
+  const x = 16*Math.pow(Math.sin(t),3);
+  const y = 13*Math.cos(t) -5*Math.cos(2*t) -2*Math.cos(3*t) -Math.cos(4*t);
+  flowerPos.push((x/10)+ (Math.random()-0.5)*0.5, (y/10)+ (Math.random()-0.5)*0.5, (Math.random()-0.5)*3);
+  flowerColors.push(0, 0.8, 1);
+}
+flowerGeo.setAttribute('position', new THREE.Float32BufferAttribute(flowerPos, 3));
+flowerGeo.setAttribute('color', new THREE.Float32BufferAttribute(flowerColors, 3));
+const flowers = new THREE.Points(flowerGeo, new THREE.PointsMaterial({ size:0.12, vertexColors:true }));
+scene.add(flowers);
+(function animate(){ requestAnimationFrame(animate); flowers.rotation.y+=0.002; renderer.render(scene,camera); })();
+
+const modal = document.getElementById('modalCarta');
+const cardFrame = document.getElementById('cardFrame');
+const miURL = "https://jesusurielavila453.github.io/corazon/";
+const audio = document.getElementById('miAudio');
+const playBtn = document.getElementById('playBtn');
+let tocando = false;
+
+function playMusica(){
+  audio.play().then(()=>{ tocando=true; playBtn.textContent='⏸️ PAUSAR'; }).catch(e=>{ console.log("Bloqueo autoplay:", e); });
+}
+function abrirCarta(){
+  cardFrame.src = miURL;
+  modal.classList.add('show');
+  playMusica();
+}
+renderer.domElement.addEventListener('click', abrirCarta);
+document.getElementById('cerrarModal').onclick = ()=>{ modal.classList.remove('show'); cardFrame.src=""; };
+document.getElementById('abrirLink').onclick = ()=> window.open(miURL,'_blank');
+playBtn.onclick = ()=>{ if(!tocando) playMusica(); else { audio.pause(); tocando=false; playBtn.textContent='🎵 SONAR'; } };
+</script>
+</body>
+</html>
